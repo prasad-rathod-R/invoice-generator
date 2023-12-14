@@ -5,18 +5,17 @@ import java.io.IOException;
 import java.text.Format;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
-import org.apache.pdfbox.contentstream.PDContentStream;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
 import org.apache.pdfbox.pdmodel.font.PDFont;
-import org.apache.pdfbox.pdmodel.font.PDType0Font;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
 import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
-import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
@@ -160,6 +159,81 @@ public class InvoiceGeneratorApplication {
 		document.close();
 		System.out.println("Document Generated Sucessfully!!!!!!!!!!!!");
 
+	}
+
+	private static List<String> splitStringToFitCell(String text, PDPageContentStream contentStream, PDType1Font font,
+			float fontSize, float maxWidth) throws IOException {
+		List<String> lines = new ArrayList<>();
+		StringBuilder lineBuilder = new StringBuilder();
+		float lineWidth = 0;
+
+		for (String word : text.split("\\s")) {
+
+			if (word.length() > 18) {
+				String[] words = splitWordByLength(word, maxWidth);
+				for (String word1 : words) {
+					float wordWidth = font.getStringWidth(word1) / 1000 * fontSize;
+					if (lineWidth + wordWidth <= maxWidth) {
+
+						lineBuilder.append(word1).append(" ");
+						lineWidth += wordWidth + font.getStringWidth(" ") / 1000 * fontSize;
+					} else {
+						lines.add(lineBuilder.toString().trim());
+						lineBuilder = new StringBuilder(word1 + " ");
+						lineWidth = wordWidth + font.getStringWidth(" ") / 1000 * fontSize;
+					}
+				}
+
+			} else {
+
+				float wordWidth = font.getStringWidth(word) / 1000 * fontSize;
+				if (lineWidth + wordWidth <= maxWidth) {
+
+					lineBuilder.append(word).append(" ");
+					lineWidth += wordWidth + font.getStringWidth(" ") / 1000 * fontSize;
+				} else {
+					lines.add(lineBuilder.toString().trim());
+					lineBuilder = new StringBuilder(word + " ");
+					lineWidth = wordWidth + font.getStringWidth(" ") / 1000 * fontSize;
+				}
+			}
+		}
+
+		if (lineBuilder.length() > 0) {
+			lines.add(lineBuilder.toString().trim());
+		}
+
+		return lines;
+	}
+
+	private static String[] splitWordByLength(String text, float maxWidth) {
+
+		String word = text;
+		float fontSize = 12;
+
+		// Fixed length for splitting
+		int segmentLength = (int) (fontSize * 1.5);
+
+		// Calculate the number of segments
+		int numSegments = (int) Math.ceil((double) word.length() / segmentLength);
+
+		// Initialize a String array to store the segments
+		String[] segments = new String[numSegments];
+
+		// Split the word into segments and store them in the array
+		for (int i = 0; i < numSegments; i++) {
+			int start = i * segmentLength;
+			int end = Math.min(start + segmentLength, word.length()); // Ensure end doesn't exceed word length
+			segments[i] = word.substring(start, end);
+		}
+
+		// If the last segment is empty, remove it
+		if (segments[numSegments - 1].isEmpty()) {
+			String[] newSegments = new String[numSegments - 1];
+			System.arraycopy(segments, 0, newSegments, 0, numSegments - 1);
+			segments = newSegments;
+		}
+		return segments;
 	}
 
 	public static void addPageNumbers(PDDocument document, String numberingFormat, int offset_X, int offset_Y)
