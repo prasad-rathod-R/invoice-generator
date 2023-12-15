@@ -61,7 +61,7 @@ public class UserPdfReportServiceImpl implements UserPdfReportService {
 
 			MytableClass table = new MytableClass(document, contentSteam);
 
-			int cellWidths[] = { 70,70, 50, 70, 100, 100 };
+			int cellWidths[] = { 70, 70, 50, 70, 100, 100 };
 			table.setTable(cellWidths, 25, 20, pageHeight - 350);
 			table.setTableFont(font, 16, Color.BLACK);
 
@@ -80,18 +80,37 @@ public class UserPdfReportServiceImpl implements UserPdfReportService {
 			for (Object[] arr : getAllTableDataQuery) {
 				serialMumber++;
 				table.addCell(String.valueOf(serialMumber), TableHeadColor);
-				
-				List<String> nameCellContent = splitStringToFitCell(arr[0] != null ? arr[0].toString() : "N/A",
-						contentSteam, font, 16, cellWidths[0]);
-				 for (String line : nameCellContent) {
-				        table.addCell(line, TableHeadColor);
-				    }
-				
-				table.addCell(nameCellContent.toString(), TableHeadColor);
+
+				System.out.println(serialMumber);
+
+				table.addCell(arr[0] != null ? arr[0].toString() : "N/A", TableHeadColor);
+				System.out.println(arr[0] != null ? arr[0].toString() : "N/A");
+
 				table.addCell(arr[1] != null ? arr[1].toString() : "N/A", TableHeadColor);
+				System.out.println(arr[1] != null ? arr[1].toString() : "N/A");
+
 				table.addCell(arr[2] != null ? arr[2].toString() : "N/A", TableHeadColor);
+				System.out.println(arr[2] != null ? arr[2].toString() : "N/A");
+
 				table.addCell(arr[3] != null ? arr[3].toString() : "N/A", TableHeadColor);
+				System.out.println(arr[3] != null ? arr[3].toString() : "N/A");
+
 				table.addCell(arr[4] != null ? arr[4].toString() : "N/A", TableHeadColor);
+				System.out.println(arr[4] != null ? arr[4].toString() : "N/A");
+				
+				
+				
+//				if (arr[4].toString().length() > 10) {
+//					
+//					
+//					
+//					
+//					
+//					
+//				}
+				
+				
+
 			}
 
 			contentSteam.close();
@@ -157,7 +176,7 @@ public class UserPdfReportServiceImpl implements UserPdfReportService {
 			word = adjustFontSizeForWord(word, font, fontSize, maxWidth);
 			if (word.length() > 10) {
 				System.out.println("Entering in If");
-				String[] words = splitWordByLength(word, maxWidth);
+				String[] words = splitWordByWidth(word, maxWidth, font, fontSize);
 				for (String word1 : words) {
 					float wordWidth = font.getStringWidth(word1) / 1000 * fontSize;
 					if (lineWidth + wordWidth <= maxWidth) {
@@ -193,35 +212,37 @@ public class UserPdfReportServiceImpl implements UserPdfReportService {
 		return lines;
 	}
 
-	private static String[] splitWordByLength(String text, float maxWidth) {
+	private static String[] splitWordByWidth(String text, float maxWidth, PDFont font, float fontSize) {
+	    List<String> segments = new ArrayList<>();
+	    StringBuilder currentSegment = new StringBuilder();
+	    float currentWidth = 0;
 
-		String word = text;
-		float fontSize = 12;
+	    for (char c : text.toCharArray()) {
+	        float charWidth = 0;
+			try {
+				charWidth = font.getStringWidth(String.valueOf(c)) / 1000 * fontSize;
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 
-		// Fixed length for splitting
-		int segmentLength = (int) (fontSize * 1.5);
+	        if (currentWidth + charWidth <= maxWidth) {
+	            currentSegment.append(c);
+	            currentWidth += charWidth;
+	        } else {
+	            segments.add(currentSegment.toString());
+	            currentSegment = new StringBuilder(String.valueOf(c));
+	            currentWidth = charWidth;
+	        }
+	    }
 
-		// Calculate the number of segments
-		int numSegments = (int) Math.ceil((double) word.length() / segmentLength);
+	    if (currentSegment.length() > 0) {
+	        segments.add(currentSegment.toString());
+	    }
 
-		// Initialize a String array to store the segments
-		String[] segments = new String[numSegments];
-
-		// Split the word into segments and store them in the array
-		for (int i = 0; i < numSegments; i++) {
-			int start = i * segmentLength;
-			int end = Math.min(start + segmentLength, word.length()); // Ensure end doesn't exceed word length
-			segments[i] = word.substring(start, end);
-		}
-
-		// If the last segment is empty, remove it
-		if (segments[numSegments - 1].isEmpty()) {
-			String[] newSegments = new String[numSegments - 1];
-			System.arraycopy(segments, 0, newSegments, 0, numSegments - 1);
-			segments = newSegments;
-		}
-		return segments;
+	    return segments.toArray(new String[0]);
 	}
+
 
 	public static void addPageNumbers(PDDocument document, String numberingFormat, int offset_X, int offset_Y)
 			throws IOException {
@@ -309,7 +330,7 @@ public class UserPdfReportServiceImpl implements UserPdfReportService {
 
 		void setTable(int[] colWidths, int cellHeight, int xPosition, int yPosition) {
 			this.colWidths = colWidths;
-			this.cellHeight = cellHeight;
+			this.cellHeight = 50;
 			this.xPosition = xPosition;
 			this.yPosition = yPosition;
 			xInitialPosition = xPosition;
@@ -320,7 +341,7 @@ public class UserPdfReportServiceImpl implements UserPdfReportService {
 			this.fontSize = fontSize;
 			this.fontColor = fontColor;
 		}
-
+		
 		void addCell(String text, Color fillColor) throws IOException {
 			contentStream.setStrokingColor(1f);
 
