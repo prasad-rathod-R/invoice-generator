@@ -33,6 +33,11 @@
 			<scope>runtime</scope>
 			<optional>true</optional>
 		</dependency>
+		 <dependency>
+            <groupId>com.github.dhorions</groupId>
+            <artifactId>boxable</artifactId>
+            <version>1.7.0</version>
+        </dependency>
 		<dependency>
 			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId>
