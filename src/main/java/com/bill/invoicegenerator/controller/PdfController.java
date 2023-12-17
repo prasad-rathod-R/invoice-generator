@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.bill.invoicegenerator.request.UserRequest;
+import com.bill.invoicegenerator.service.PdfBoxTableService;
 import com.bill.invoicegenerator.service.UserPdfReportService;
 
 @RequestMapping("/pdf")
@@ -19,10 +20,18 @@ public class PdfController {
 
 	@Autowired
 	UserPdfReportService service;
+	
+	@Autowired
+	PdfBoxTableService serv;
 
 	@GetMapping("/generate")
 	public ResponseEntity<Map<String, Object>> generatePdf(@RequestBody UserRequest request) {
 		return service.generatePdf(request);
+	}
+	
+	@GetMapping("/generate/tablewie")
+	public ResponseEntity<Map<String, Object>> generatePdf2(@RequestBody UserRequest request) {
+		return serv.generatePdf2(request);
 	}
 
 }
