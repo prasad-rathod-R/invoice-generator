@@ -16,6 +16,7 @@ import org.apache.pdfbox.pdmodel.common.PDRectangle;
 import org.apache.pdfbox.pdmodel.font.PDFont;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
 import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
+import org.apache.pdfbox.pdmodel.interactive.annotation.PDAnnotationTextMarkup;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
@@ -26,6 +27,8 @@ public class InvoiceGeneratorApplication2 {
 		PDDocument document = new PDDocument();
 		PDPage page = new PDPage();
 		document.addPage(page);
+		PDAnnotationTextMarkup markup = new PDAnnotationTextMarkup(PDAnnotationTextMarkup.SUB_TYPE_UNDERLINE);
+
 
 		String name = "Prasad Rathod";
 		String callNo = "7676646825";
@@ -41,8 +44,17 @@ public class InvoiceGeneratorApplication2 {
 
 		PDFont font = PDType1Font.HELVETICA;
 		PDFont italicFont = PDType1Font.HELVETICA_OBLIQUE;
+		
+        drawLine(contentSteam, callNo, pageHeight, pageHeight, pageHeight, pageHeight);
+
+
 
 		myTextWriter.addSingleLineText("Customer Name: " + name, 25, pageHeight - 100, font, 16, Color.BLACK);
+		
+		String Sign = "something";
+		float authSign = myTextWriter.getTextWidth(Sign, italicFont, 16);
+		int xpos = pageWidth-250+pageWidth-25;
+		myTextWriter.addSingleLineText(Sign, (int)(xpos-authSign)/2, 125, italicFont, 16, Color.BLACK);
 
 		MytableClass table = new MytableClass(document, contentSteam);
 
@@ -71,6 +83,22 @@ public class InvoiceGeneratorApplication2 {
 		document.close();
 		System.out.println("Document Generated Sucessfully!!!!!!!!!!!!");
 
+	}
+	
+	public static void drawLine(PDPageContentStream contentStream, String text, float lineWidth, float sx, float sy, float linePosition) throws IOException {
+	     //Calculate String width
+		PDFont font = PDType1Font.HELVETICA_BOLD;
+		float fontSize = 10f;
+		String str = "Hello";
+
+	    float stringWidth = fontSize * font.getStringWidth(str) / 1000;
+	    float lineEndPoint = sx + stringWidth;
+
+	    //begin to draw our line
+	    contentStream.setLineWidth(lineWidth);
+	    contentStream.moveTo(sx, sy + linePosition);
+	    contentStream.lineTo(lineEndPoint, sy + linePosition);
+	    contentStream.stroke();
 	}
 
 	private static List<String> splitStringToFitCell(String text, PDPageContentStream contentStream, PDType1Font font,

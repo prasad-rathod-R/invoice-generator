@@ -18,16 +18,16 @@ import com.bill.invoicegenerator.service.UserPdfReportService;
 @RestController
 public class PdfController {
 
-	@Autowired
-	UserPdfReportService service;
+//	@Autowired
+//	UserPdfReportService service;
 	
 	@Autowired
 	PdfBoxTableService serv;
 
-	@GetMapping("/generate")
-	public ResponseEntity<Map<String, Object>> generatePdf(@RequestBody UserRequest request) {
-		return service.generatePdf(request);
-	}
+//	@GetMapping("/generate")
+//	public ResponseEntity<Map<String, Object>> generatePdf(@RequestBody UserRequest request) {
+//		return service.generatePdf(request);
+//	}
 	
 	@GetMapping("/generate/tablewie")
 	public ResponseEntity<Map<String, Object>> generatePdf2(@RequestBody UserRequest request) {
